@@ -36,13 +36,38 @@ function createKibanaClient(config: KibanaConfig): KibanaClient {
   };
 
   // Add authentication
-  if (config.kibanaSessionCookie && config.kibanaSessionCookie.trim() !== "") {
-    // If a session cookie is provided, use it.
-    axiosConfig.headers['Cookie'] = config.kibanaSessionCookie;
-    // Ensure basic auth is not used if cookie is present
-    delete axiosConfig.auth;
-  } else if (config.username && config.password) {
-    // Otherwise, use basic authentication if username and password are provided.
+  let customHeadersProcessedSuccessfully = false;
+
+  if (config.customHeaders && config.customHeaders.trim() !== "") {
+    try {
+      const parsedHeaders = JSON.parse(config.customHeaders);
+      // Merge custom headers, potentially overwriting defaults
+      axiosConfig.headers = { ...axiosConfig.headers, ...parsedHeaders };
+
+      const authorizationHeaderKey = Object.keys(axiosConfig.headers).find(key => key.toLowerCase() === 'authorization');
+
+      if (authorizationHeaderKey) {
+        delete axiosConfig.auth;
+      }
+      customHeadersProcessedSuccessfully = true;
+    } catch (error) {
+      console.error(
+        "Error: KIBANA_CUSTOM_HEADERS could not be parsed as valid JSON. " +
+        "Please check the format. Proceeding without custom headers. " +
+        `Details: ${error instanceof Error ? error.message : String(error)}`
+      );
+      // Ensure customHeadersProcessedSuccessfully remains false
+    }
+  }
+
+  // Fallback to basic auth if:
+  // 1. No custom headers were provided OR
+  // 2. Custom headers were provided and processed, but they did NOT include an Authorization header.
+  // (Parsing failure is handled by customHeadersProcessedSuccessfully remaining false)
+  const hasCustomAuthorization = customHeadersProcessedSuccessfully &&
+                                 Object.keys(axiosConfig.headers).some(key => key.toLowerCase() === 'authorization');
+
+  if (!hasCustomAuthorization && config.username && config.password) {
     axiosConfig.auth = {
       username: config.username,
       password: config.password,
@@ -288,7 +313,7 @@ async function main() {
     // Create configuration from environment variables
     const config: KibanaConfig = {
       url: process.env.KIBANA_URL || "http://localhost:5601",
-      kibanaSessionCookie: process.env.KIBANA_SESSION_COOKIE || "",
+      customHeaders: process.env.KIBANA_CUSTOM_HEADERS || "",
       username: process.env.KIBANA_USERNAME || "",
       password: process.env.KIBANA_PASSWORD || "",
       caCert: process.env.KIBANA_CA_CERT,

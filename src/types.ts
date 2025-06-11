@@ -22,9 +22,9 @@ export const BaseDescriptionSchema = z.object({
 // Configuration schema
 export const KibanaConfigSchema = z.object({
   url: z.string().trim().min(1, "Kibana URL cannot be empty").url("Invalid Kibana URL format"),
-  username: z.string().optional().describe("Username for Basic Authentication. Not required if kibanaSessionCookie is provided."),
-  password: z.string().optional().describe("Password for Basic Authentication. Not required if kibanaSessionCookie is provided."),
-  kibanaSessionCookie: z.string().optional().describe("Session cookie (e.g., _oauth2_proxy value) for authenticating with Kibana via an OAuth proxy."),
+  username: z.string().optional().describe("Username for Basic Authentication. Used if an 'Authorization' header is not provided via customHeaders."),
+  password: z.string().optional().describe("Password for Basic Authentication. Used if an 'Authorization' header is not provided via customHeaders."),
+  customHeaders: z.string().optional().describe("A JSON string representing key-value pairs of custom HTTP headers to send with requests. E.g., '{\"Cookie\": \"name=value\", \"X-Custom-Header\": \"custom_value\"}'. Takes precedence over default headers."),
   caCert: z.string().optional(),
   timeout: z.number().optional().default(30000),
   maxRetries: z.number().optional().default(3),
