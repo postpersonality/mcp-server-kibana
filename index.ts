@@ -36,11 +36,13 @@ function createKibanaClient(config: KibanaConfig): KibanaClient {
   };
 
   // Add authentication
-  if (config.oauthToken && config.oauthToken.trim() !== "") {
-    axiosConfig.headers['Authorization'] = `Bearer ${config.oauthToken}`;
-    // Ensure basic auth is not used if token is present
+  if (config.kibanaSessionCookie && config.kibanaSessionCookie.trim() !== "") {
+    // If a session cookie is provided, use it.
+    axiosConfig.headers['Cookie'] = config.kibanaSessionCookie;
+    // Ensure basic auth is not used if cookie is present
     delete axiosConfig.auth;
   } else if (config.username && config.password) {
+    // Otherwise, use basic authentication if username and password are provided.
     axiosConfig.auth = {
       username: config.username,
       password: config.password,
@@ -286,6 +288,7 @@ async function main() {
     // Create configuration from environment variables
     const config: KibanaConfig = {
       url: process.env.KIBANA_URL || "http://localhost:5601",
+      kibanaSessionCookie: process.env.KIBANA_SESSION_COOKIE || "",
       username: process.env.KIBANA_USERNAME || "",
       password: process.env.KIBANA_PASSWORD || "",
       caCert: process.env.KIBANA_CA_CERT,
