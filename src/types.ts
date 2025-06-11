@@ -22,8 +22,9 @@ export const BaseDescriptionSchema = z.object({
 // Configuration schema
 export const KibanaConfigSchema = z.object({
   url: z.string().trim().min(1, "Kibana URL cannot be empty").url("Invalid Kibana URL format"),
-  username: z.string().optional(),
-  password: z.string().optional(),
+  username: z.string().optional().describe("Username for Basic Authentication. Not required if oauthToken is provided."),
+  password: z.string().optional().describe("Password for Basic Authentication. Not required if oauthToken is provided."),
+  oauthToken: z.string().optional().describe("OAuth token for Bearer Authentication. If provided, username and password will be ignored."),
   caCert: z.string().optional(),
   timeout: z.number().optional().default(30000),
   maxRetries: z.number().optional().default(3),

@@ -36,7 +36,11 @@ function createKibanaClient(config: KibanaConfig): KibanaClient {
   };
 
   // Add authentication
-  if (config.username && config.password) {
+  if (config.oauthToken && config.oauthToken.trim() !== "") {
+    axiosConfig.headers['Authorization'] = `Bearer ${config.oauthToken}`;
+    // Ensure basic auth is not used if token is present
+    delete axiosConfig.auth;
+  } else if (config.username && config.password) {
     axiosConfig.auth = {
       username: config.username,
       password: config.password,

@@ -148,17 +148,28 @@ env $(cat kibana-mcp.env | xargs) npx @tocharian/mcp-server-kibana
 
 ## Configuration
 
-Configure the server via environment variables:
+### Authentication
 
-| Variable Name                    | Description                                         | Required |
-|----------------------------------|-----------------------------------------------------|----------|
-| `KIBANA_URL`                     | Kibana server address (e.g. http://localhost:5601)   | Yes      |
-| `KIBANA_USERNAME`                | Kibana username                                     | Yes      |
-| `KIBANA_PASSWORD`                | Kibana password                                     | Yes      |
-| `KIBANA_CA_CERT`                 | CA certificate path (optional, for SSL verification) | No       |
-| `KIBANA_TIMEOUT`                 | Request timeout in ms (default 30000)                | No       |
-| `KIBANA_MAX_RETRIES`             | Max request retries (default 3)                      | No       |
-| `NODE_TLS_REJECT_UNAUTHORIZED`   | Set to `0` to disable SSL certificate validation (use with caution) | No |
+The application can authenticate with the Kibana API using one of two methods:
+
+1.  **OAuth Token (Recommended for SSO environments):**
+    *   Set the `KIBANA_OAUTH_TOKEN` environment variable to your OAuth Bearer token.
+    *   If this variable is set, it will be used for authentication, and `KIBANA_USERNAME` / `KIBANA_PASSWORD` will be ignored.
+
+2.  **Basic Authentication:**
+    *   Set `KIBANA_USERNAME` to your Kibana username.
+    *   Set `KIBANA_PASSWORD` to your Kibana password.
+    *   These are used only if `KIBANA_OAUTH_TOKEN` is not set.
+
+### Environment Variables:
+*   `KIBANA_URL`: (Required) The URL of your Kibana instance (e.g., `http://localhost:5601`).
+*   `KIBANA_OAUTH_TOKEN`: (Optional) Your OAuth Bearer token for authenticating with Kibana.
+*   `KIBANA_USERNAME`: (Optional) Your Kibana username (for Basic Auth).
+*   `KIBANA_PASSWORD`: (Optional) Your Kibana password (for Basic Auth).
+*   `KIBANA_CA_CERT`: (Optional) Path to a custom CA certificate if your Kibana instance uses a self-signed SSL certificate.
+*   `KIBANA_TIMEOUT`: (Optional) Timeout for Kibana API requests in milliseconds (default: 30000).
+*   `KIBANA_MAX_RETRIES`: (Optional) Maximum number of retries for failed Kibana API requests (default: 3).
+*   `NODE_TLS_REJECT_UNAUTHORIZED`: (Optional) Set to `0` to disable SSL certificate validation (use with caution).
 
 ---
 
